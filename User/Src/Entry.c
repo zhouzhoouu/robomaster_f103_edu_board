@@ -1,5 +1,5 @@
 #include "Entry.h"
-#include "oled.h"
+#include "OLED_DMA.h"
 #include "BSP_CAN.h"
 
 void set_motor_current(float current_f)
@@ -31,19 +31,27 @@ void BSP_CAN_Callback(uint8_t* pdata, CAN_RxHeaderTypeDef* header_rx){
 
 _Noreturn void Entry(void){
 
-    OLED_Init();
+    OLED_DMA_Init();
     BSP_CAN_init();
 
-    OLED_Clear();
+    OLED_DMA_Clear();
 
-    displayF16x32_dig(0,0,6);
+    OLED_DMA_Display_DIG(0,0,8);
 
     uint8_t data[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
+
+    uint64_t lastf = OLED_DMA_F_Count;
+
     while (1){
 
+        uint32_t f = OLED_DMA_F_Count-lastf;
+        lastf = OLED_DMA_F_Count;
+
+        OLED_DMA_ShowNum(100,0,f,3,12);
+
         HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
-        HAL_Delay(200);
+        HAL_Delay(1000);
 
     }
 
